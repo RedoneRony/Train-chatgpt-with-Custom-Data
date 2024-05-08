@@ -23,9 +23,18 @@ const VECTOR_STORE_PATH = `${txtFilename}.index`;
 
 
 export const runWithEmbeddings = async (question) => {
-
     // Initialize the OpenAI model with an empty configuration object
-    const model = new OpenAI({});
+    // const model = new OpenAI({});
+    // OpenAI Configuration
+    const model = new OpenAI({
+        temperature: 0.5,
+        // max_tokens: 256,
+        // // top_p: 1,
+        // // frequency_penalty: 0,
+        // // presence_penalty: 0,
+        openAIApiKey: process.env.OPENAI_API_KEY,
+        modelName: 'gpt-3.5-turbo'
+    });
     let vectorStore;
     if (fs.existsSync(VECTOR_STORE_PATH)) {
         console.log('Vector Exists..');
@@ -34,6 +43,7 @@ export const runWithEmbeddings = async (question) => {
         const text = fs.readFileSync(txtPath, 'utf8');
         const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
         const docs = await textSplitter.createDocuments([text]);
+        console.log(docs);
         vectorStore = await HNSWLib.fromDocuments(docs, new OpenAIEmbeddings());
         await vectorStore.save(VECTOR_STORE_PATH);
     }
